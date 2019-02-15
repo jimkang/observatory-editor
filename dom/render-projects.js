@@ -36,18 +36,23 @@ function appendElementsForProjects(projectsSel, exampleProject) {
       .append('div')
       .classed('field-label', true)
       .text(field);
-    appendControlForValue(container, field);
+    appendControlForValue(container, field, typeof exampleProject[field]);
   }
 }
 
-function appendControlForValue(container, field) {
+function appendControlForValue(container, field, valueType) {
   if (field === 'description') {
     container.append('textarea').attr('data-of', field);
   } else {
-    container
+    let input = container
       .append('input')
-      .attr('data-of', field)
-      .attr('type', 'text');
+      .attr('data-of', field);
+
+    if (valueType === 'boolean') {
+      input.attr('type', 'checkbox');
+    } else {
+      input.attr('type', 'text');
+    }
   }
 }
 
@@ -55,7 +60,18 @@ function updateProjectsField(projectsSel, field) {
   if (field === 'description') {
     projectsSel.select(`[data-of=${field}]`).text(accessor(field));
   } else {
-    projectsSel.select(`[data-of=${field}]`).attr('value', accessor(field));
+    projectsSel.select(`[data-of=${field}]`)
+      .attr('value', accessor(field))
+      .each(curry(setChecked)(field));
+  }
+}
+
+// If this field has a boolean value and that value is true, then
+// checked should be set on the element.
+function setChecked(field, project) {
+  var value = project[field];
+  if (value && typeof value === 'boolean') {
+    this.setAttribute('checked', null);
   }
 }
 

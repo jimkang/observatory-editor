@@ -1,15 +1,16 @@
 var d3 = require('d3-selection');
-//var of = require('object-form');
+var of = require('object-form');
 
 var listenersInit = false;
-//var objectFromDOM = of.ObjectFromDOM({});
+var objectFromDOM = of.ObjectFromDOM({});
 
-function wireControls({ loadProjectsFlow }) {
+function wireControls({ loadProjectsFlow, saveProjectsFlow }) {
   if (listenersInit) {
     return;
   }
   listenersInit = true;
 
+  d3.select('#save-button').on('click', onSave);
   d3.select('#projects-file').on('change', onProjectsFileChange);
 
   var file = getFile();
@@ -41,6 +42,15 @@ function wireControls({ loadProjectsFlow }) {
     if (projects) {
       loadProjectsFlow({ projects });
     }
+  }
+
+  function onSave() {
+    var projects = [];
+    var projectItems = document.querySelectorAll('#project-root .project');
+    for (var i = 0; i < projectItems.length; ++i) {
+      projects.push(objectFromDOM(projectItems[i]));
+    }
+    saveProjectsFlow({ projects });
   }
 }
 
