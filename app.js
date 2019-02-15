@@ -19,5 +19,9 @@ function reportTopLevelError(msg, url, lineNo, columnNo, error) {
 }
 
 function followRoute() {
-  wireControls({ addToRoute: routeState.addToRoute, loadProjectsFlow, saveProjectsFlow });
+  wireControls({
+    addToRoute: routeState.addToRoute,
+    loadProjectsFlow,
+    saveProjectsFlow
+  });
 }

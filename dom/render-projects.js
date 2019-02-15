@@ -7,6 +7,7 @@ var normalizeObjects = require('normalize-objects')({
   }
 });
 var curry = require('lodash.curry');
+var fieldsThatShouldRenderAsJSON = require('../fields-that-should-render-as-JSON');
 
 function renderProjects({ projectData }) {
   normalizeObjects(projectData);
@@ -44,9 +45,7 @@ function appendControlForValue(container, field, valueType) {
   if (field === 'description') {
     container.append('textarea').attr('data-of', field);
   } else {
-    let input = container
-      .append('input')
-      .attr('data-of', field);
+    let input = container.append('input').attr('data-of', field);
 
     if (valueType === 'boolean') {
       input.attr('type', 'checkbox');
@@ -60,8 +59,9 @@ function updateProjectsField(projectsSel, field) {
   if (field === 'description') {
     projectsSel.select(`[data-of=${field}]`).text(accessor(field));
   } else {
-    projectsSel.select(`[data-of=${field}]`)
-      .attr('value', accessor(field))
+    projectsSel
+      .select(`[data-of=${field}]`)
+      .attr('value', curry(getValueForField)(field))
       .each(curry(setChecked)(field));
   }
 }
@@ -72,6 +72,14 @@ function setChecked(field, project) {
   var value = project[field];
   if (value && typeof value === 'boolean') {
     this.setAttribute('checked', null);
+  }
+}
+
+function getValueForField(field, project) {
+  if (fieldsThatShouldRenderAsJSON.indexOf(field) === -1) {
+    return project[field];
+  } else {
+    return JSON.stringify(project[field]);
   }
 }
 
