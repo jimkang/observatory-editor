@@ -31,7 +31,14 @@ function renderProjects({ projectData }) {
 }
 
 function appendElementsForProjects(projectsSel, exampleProject) {
-  for (var field in exampleProject) {
+  // Move 'name' to the front.
+  var fields = Object.keys(exampleProject);
+  fields.splice(fields.indexOf('name'), 1);
+  fields.sort();
+  fields.unshift('name');
+  fields.forEach(appendElementsForField);
+
+  function appendElementsForField(field) {
     let container = projectsSel.append('div').classed('field-container', true);
     container
       .append('div')
