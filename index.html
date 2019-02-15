@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>Observatory Editor</title>
+    <link rel="stylesheet" href="app.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="status-message" class="hidden"></div>
+
+    <section id="file-load-section">
+      <div>Pick a project file to edit.</div>
+      <input type="file" id="projects-file" accept="application/json" />
+    </section>
+
+    <section id="projects">
+      <ul id="project-root">
+      </ul>
+    </section>
+
+    <section>
+      <button id="save-button">Save</button>
+
+      <div id="save-message" class="hidden"></div>
+    </section>
+
+    <script src="index.js"></script>
+  </body>
+</html>
