@@ -27,7 +27,7 @@ function followRoute() {
   });
 }
 
-},{"./dom/wire-controls":4,"./flows/load-projects-flow":6,"./flows/save-projects-flow":7,"handle-error-web":10,"route-state":17}],2:[function(require,module,exports){
+},{"./dom/wire-controls":4,"./flows/load-projects-flow":6,"./flows/save-projects-flow":7,"handle-error-web":10,"route-state":18}],2:[function(require,module,exports){
 module.exports = ['shippedDate'];
 
 },{}],3:[function(require,module,exports){
@@ -134,7 +134,7 @@ function getValueForField(field, project) {
 
 module.exports = renderProjects;
 
-},{"../date-fields":2,"../fields-that-should-render-as-JSON":5,"accessor":8,"d3-selection":9,"lodash.curry":12,"normalize-objects":14}],4:[function(require,module,exports){
+},{"../date-fields":2,"../fields-that-should-render-as-JSON":5,"accessor":8,"d3-selection":9,"lodash.curry":12,"normalize-objects":15}],4:[function(require,module,exports){
 var d3 = require('d3-selection');
 var of = require('object-form');
 
@@ -203,7 +203,7 @@ function getFile() {
 
 module.exports = wireControls;
 
-},{"d3-selection":9,"object-form":15}],5:[function(require,module,exports){
+},{"d3-selection":9,"object-form":16}],5:[function(require,module,exports){
 module.exports = ['form', 'sources', 'tags', 'links'];
 
 },{}],6:[function(require,module,exports){
@@ -217,6 +217,7 @@ module.exports = loadProjectsFlow;
 
 },{"../dom/render-projects":3}],7:[function(require,module,exports){
 var renderDownloadLink = require('render-dl-link');
+var noThrowJSONParse = require('no-throw-json-parse');
 
 var fieldsThatShouldRenderAsJSON = require('../fields-that-should-render-as-JSON');
 var dateFields = require('../date-fields');
@@ -251,7 +252,7 @@ function convertJSONFieldsToObjects(project) {
   function convertJSONFieldToObject(field) {
     var value = project[field];
     if (value && typeof value === 'string') {
-      project[field] = JSON.parse(value);
+      project[field] = noThrowJSONParse(value, []);
     } else {
       // Defaulting to array instead of object.
       project[field] = [];
@@ -272,7 +273,7 @@ function convertDateFieldsToDates(project) {
 
 module.exports = saveProjectsFlow;
 
-},{"../date-fields":2,"../fields-that-should-render-as-JSON":5,"render-dl-link":16}],8:[function(require,module,exports){
+},{"../date-fields":2,"../fields-that-should-render-as-JSON":5,"no-throw-json-parse":14,"render-dl-link":17}],8:[function(require,module,exports){
 function Accessor() {
   var cachedAccessors = {
     identity: identity
@@ -5014,6 +5015,19 @@ function keysIn(object) {
 module.exports = defaults;
 
 },{}],14:[function(require,module,exports){
+function noThrowJSONParse(s, defaultVal) {
+  var parsed = defaultVal;
+  try {
+    parsed = JSON.parse(s);
+  } catch (e) {
+    console.error('Parsing error on', s);
+  }
+  return parsed;
+}
+
+module.exports = noThrowJSONParse;
+
+},{}],15:[function(require,module,exports){
 var dateRegex = new RegExp(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/);
 
 function NormalizeObjects({ defaults }) {
@@ -5066,7 +5080,7 @@ function NormalizeObjects({ defaults }) {
 
 module.exports = NormalizeObjects;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 function ObjectFromDOM({
   dataAttribute = 'of',
   dataTypeAttribute = 'oftype',
@@ -5139,7 +5153,7 @@ module.exports = {
   ObjectFromDOM
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 function renderDownloadLink({
   blob,
   parentSelector,
@@ -5158,7 +5172,7 @@ function renderDownloadLink({
 
 module.exports = renderDownloadLink;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var qs = require('qs');
 var cloneDeep = require('lodash.clonedeep');
 var defaults = require('lodash.defaults');
@@ -5220,7 +5234,7 @@ function RouteState(opts) {
 
 module.exports = RouteState;
 
-},{"lodash.clonedeep":11,"lodash.defaults":13,"qs":19}],18:[function(require,module,exports){
+},{"lodash.clonedeep":11,"lodash.defaults":13,"qs":20}],19:[function(require,module,exports){
 'use strict';
 
 var replace = String.prototype.replace;
@@ -5240,7 +5254,7 @@ module.exports = {
     RFC3986: 'RFC3986'
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var stringify = require('./stringify');
@@ -5253,7 +5267,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{"./formats":18,"./parse":20,"./stringify":21}],20:[function(require,module,exports){
+},{"./formats":19,"./parse":21,"./stringify":22}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -5429,7 +5443,7 @@ module.exports = function (str, opts) {
     return utils.compact(obj);
 };
 
-},{"./utils":22}],21:[function(require,module,exports){
+},{"./utils":23}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -5641,7 +5655,7 @@ module.exports = function (object, opts) {
     return joined.length > 0 ? prefix + joined : '';
 };
 
-},{"./formats":18,"./utils":22}],22:[function(require,module,exports){
+},{"./formats":19,"./utils":23}],23:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty;
