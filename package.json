@@ -1,6 +1,6 @@
 {
   "name": "observatory-editor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Edits metadata for Observatory.",
   "main": "index.js",
   "private": true,
