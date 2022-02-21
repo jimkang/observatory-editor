@@ -1,4 +1,5 @@
 var renderDownloadLink = require('render-dl-link');
+var noThrowJSONParse = require('no-throw-json-parse');
 
 var fieldsThatShouldRenderAsJSON = require('../fields-that-should-render-as-JSON');
 var dateFields = require('../date-fields');
@@ -33,7 +34,7 @@ function convertJSONFieldsToObjects(project) {
   function convertJSONFieldToObject(field) {
     var value = project[field];
     if (value && typeof value === 'string') {
-      project[field] = JSON.parse(value);
+      project[field] = noThrowJSONParse(value, []);
     } else {
       // Defaulting to array instead of object.
       project[field] = [];
