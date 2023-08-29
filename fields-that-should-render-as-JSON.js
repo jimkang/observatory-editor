@@ -1,1 +1,1 @@
-module.exports = ['form', 'sources', 'tags', 'links'];
+module.exports = ['sources', 'tags', 'links'];

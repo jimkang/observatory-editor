@@ -32,7 +32,7 @@
     "lodash.curry": "^4.1.1",
     "no-throw-json-parse": "^1.0.0",
     "normalize-objects": "^1.0.0",
-    "object-form": "^0.9.3",
+    "object-form": "^0.10.1",
     "render-dl-link": "^1.0.0",
     "route-state": "^1.1.2",
     "standard-bail": "^2.0.1"

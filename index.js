@@ -42,6 +42,16 @@ var normalizeObjects = require('normalize-objects')({
 var curry = require('lodash.curry');
 var fieldsThatShouldRenderAsJSON = require('../fields-that-should-render-as-JSON');
 var dateFields = require('../date-fields');
+// Not great to reach outside of the project, but what're you gonna do, make a package?
+var criteria = require('../../observatory/criteria');
+
+var selectFields = ['environment', 'form', 'purpose', 'releaseState'];
+var fixedValuesForFields = {};
+selectFields.forEach(category => fixedValuesForFields[category] = getCategoryNames(category));
+
+function getCategoryNames(category) {
+  return criteria.filter(crit => crit.category === category && crit.roles.includes('filter')).map(crit => crit.name).concat(['']);
+}
 
 function renderProjects({ projectData }) {
   normalizeObjects(projectData);
@@ -85,9 +95,15 @@ function appendElementsForProjects(projectsSel, exampleProject) {
 function appendControlForValue(container, field, valueType) {
   if (field === 'description') {
     container.append('textarea').attr('data-of', field);
+  } else if (selectFields.includes(field)) {
+    let selectControl = container.append('select').attr('data-of', field);
+    let options = selectControl.selectAll('option').data(fixedValuesForFields[field]);
+    options.exit().remove();
+    let existingOptions = options.enter().append('option').merge(options)
+      .text(accessor('identity'))
+      .attr('value', accessor('identity'))
   } else {
     let input = container.append('input').attr('data-of', field);
-
     if (valueType === 'boolean') {
       input.attr('type', 'checkbox');
     } else if (dateFields.indexOf(field) !== -1) {
@@ -101,11 +117,19 @@ function appendControlForValue(container, field, valueType) {
 function updateProjectsField(projectsSel, field) {
   if (field === 'description') {
     projectsSel.select(`[data-of=${field}]`).text(accessor(field));
+  } else if (selectFields.includes(field)) {
+    projectsSel.select(`[data-of=${field}]`).selectAll('option').attr('selected', getSelectedAttrValue);
   } else {
     projectsSel
       .select(`[data-of=${field}]`)
       .attr('value', curry(getValueForField)(field))
       .each(curry(setChecked)(field));
+  }
+
+  function getSelectedAttrValue(optionValue) {
+    const fieldValue = d3.select(this.parentNode).datum()[field];
+    console.log(fieldValue, optionValue, 'match', fieldValue === optionValue);
+    return fieldValue === optionValue ? 'selected' : null
   }
 }
 
@@ -134,7 +158,7 @@ function getValueForField(field, project) {
 
 module.exports = renderProjects;
 
-},{"../date-fields":2,"../fields-that-should-render-as-JSON":5,"accessor":8,"d3-selection":9,"lodash.curry":12,"normalize-objects":15}],4:[function(require,module,exports){
+},{"../../observatory/criteria":24,"../date-fields":2,"../fields-that-should-render-as-JSON":5,"accessor":8,"d3-selection":9,"lodash.curry":12,"normalize-objects":15}],4:[function(require,module,exports){
 var d3 = require('d3-selection');
 var of = require('object-form');
 
@@ -204,7 +228,7 @@ function getFile() {
 module.exports = wireControls;
 
 },{"d3-selection":9,"object-form":16}],5:[function(require,module,exports){
-module.exports = ['form', 'sources', 'tags', 'links'];
+module.exports = ['sources', 'tags', 'links'];
 
 },{}],6:[function(require,module,exports){
 var renderProjects = require('../dom/render-projects');
@@ -5144,6 +5168,21 @@ function ObjectFromDOM({
 function defaultGetValueFromElement(el) {
   if (el.type === 'checkbox') {
     return el.checked;
+  } else if (el.type === 'select-one') {
+    let options = el.selectedOptions;
+    if (options.length < 1) {
+      return;
+    }
+    if (options.length === 1) {
+      return options[0].value;
+    }
+  } else if (el.type === 'select-multiple') {
+    let options = el.selectedOptions;
+    let values = [];
+    for (let i = 0; i < options.length; ++i) {
+      values.push(options[i].value);
+    }
+    return values;
   } else {
     return el.value || el.textContent;
   }
@@ -5858,5 +5897,202 @@ exports.isBuffer = function isBuffer(obj) {
 
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
+
+},{}],24:[function(require,module,exports){
+module.exports = [
+  {
+    category: 'releaseState',
+    name: 'shipped',
+    roles: ['filter', 'groupBy']
+  },
+  /*
+  {
+    category: 'releaseState',
+    name: 'canceled',
+    roles: ['filter', 'groupBy']
+  },
+*/
+  {
+    category: 'releaseState',
+    name: 'inProgress',
+    roles: ['filter', 'groupBy']
+  },
+  {
+    category: 'featuredStatus',
+    name: 'featured',
+    roles: ['filter']
+  },
+  /*
+  {
+    category: 'featuredStatus',
+    name: 'notFeatured',
+    roles: ['filter']
+  },
+*/
+  {
+    category: 'importance',
+    name: 'importance',
+    roles: ['sortBy']
+  },
+  {
+    category: 'date',
+    name: 'startDate',
+    roles: ['sortBy']
+  },
+  {
+    category: 'date',
+    name: 'shippedDate',
+    roles: ['sortBy']
+  },
+  {
+    category: 'date',
+    name: 'lastActiveDate',
+    roles: ['sortBy']
+  },
+  {
+    category: 'purpose',
+    name: 'purpose',
+    roles: ['groupBy']
+  },
+  {
+    category: 'purpose',
+    name: 'library',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'tool',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'explanation',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'art',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'game',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'information',
+    roles: ['filter']
+  },
+  {
+    category: 'purpose',
+    name: 'library',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'environment',
+    roles: ['groupBy']
+  },
+  {
+    category: 'environment',
+    name: 'browser',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'server',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'terminal',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'anywhere',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'ios',
+    roles: ['filter']
+  },
+  {
+    category: 'environment',
+    name: 'osx',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'form',
+    roles: ['groupBy']
+  },
+  {
+    category: 'form',
+    name: 'app',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'service',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'script',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'module',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'browser-extension',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'bot',
+    roles: ['filter']
+  },
+  /*
+  {
+    category: 'form',
+    name: 'data',
+    roles: ['filter']
+  },
+*/
+  {
+    category: 'form',
+    name: 'image',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'job',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'source',
+    roles: ['filter']
+  },
+  {
+    category: 'form',
+    name: 'document',
+    roles: ['filter']
+  }
+  /*
+  {
+    category: 'form',
+    name: 'website',
+    roles: ['filter']
+  }
+*/
+];
 
 },{}]},{},[1]);

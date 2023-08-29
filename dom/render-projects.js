@@ -9,6 +9,16 @@ var normalizeObjects = require('normalize-objects')({
 var curry = require('lodash.curry');
 var fieldsThatShouldRenderAsJSON = require('../fields-that-should-render-as-JSON');
 var dateFields = require('../date-fields');
+// Not great to reach outside of the project, but what're you gonna do, make a package?
+var criteria = require('../../observatory/criteria');
+
+var selectFields = ['environment', 'form', 'purpose', 'releaseState'];
+var fixedValuesForFields = {};
+selectFields.forEach(category => fixedValuesForFields[category] = getCategoryNames(category));
+
+function getCategoryNames(category) {
+  return criteria.filter(crit => crit.category === category && crit.roles.includes('filter')).map(crit => crit.name).concat(['']);
+}
 
 function renderProjects({ projectData }) {
   normalizeObjects(projectData);
@@ -52,9 +62,15 @@ function appendElementsForProjects(projectsSel, exampleProject) {
 function appendControlForValue(container, field, valueType) {
   if (field === 'description') {
     container.append('textarea').attr('data-of', field);
+  } else if (selectFields.includes(field)) {
+    let selectControl = container.append('select').attr('data-of', field);
+    let options = selectControl.selectAll('option').data(fixedValuesForFields[field]);
+    options.exit().remove();
+    let existingOptions = options.enter().append('option').merge(options)
+      .text(accessor('identity'))
+      .attr('value', accessor('identity'))
   } else {
     let input = container.append('input').attr('data-of', field);
-
     if (valueType === 'boolean') {
       input.attr('type', 'checkbox');
     } else if (dateFields.indexOf(field) !== -1) {
@@ -68,11 +84,19 @@ function appendControlForValue(container, field, valueType) {
 function updateProjectsField(projectsSel, field) {
   if (field === 'description') {
     projectsSel.select(`[data-of=${field}]`).text(accessor(field));
+  } else if (selectFields.includes(field)) {
+    projectsSel.select(`[data-of=${field}]`).selectAll('option').attr('selected', getSelectedAttrValue);
   } else {
     projectsSel
       .select(`[data-of=${field}]`)
       .attr('value', curry(getValueForField)(field))
       .each(curry(setChecked)(field));
+  }
+
+  function getSelectedAttrValue(optionValue) {
+    const fieldValue = d3.select(this.parentNode).datum()[field];
+    console.log(fieldValue, optionValue, 'match', fieldValue === optionValue);
+    return fieldValue === optionValue ? 'selected' : null
   }
 }
 
